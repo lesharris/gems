@@ -9,10 +9,10 @@ BUILD=build
 LINKFILE=build/linkfile
 SRC=src/main.asm
 
-all: $(TARGET)
+all: clean $(TARGET)
 
 $(TARGET): $(LINKFILE)
-	$(LINKER) -d -v -r -S $(LINKFILE) $(TARGET).sms
+	$(LINKER) -v -r -S $(LINKFILE) $(TARGET).sms
 
 $(BUILD)/main.o:
 	$(AS) -i -v -o $(BUILD)/main.o $(SRC)
