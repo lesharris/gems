@@ -8,9 +8,10 @@
       "type": "emulicious-debugger",
       "request": "launch",
       "name": "Debug",
-      "program": "${workspaceFolder}/hello.sms",
+      "program": "${workspaceFolder}/test.sms",
       "port": 58870,
-      "stopOnEntry": true
+      "stopOnEntry": true,
+      "preLaunchTask": "Build"
     }
   ]
 }
