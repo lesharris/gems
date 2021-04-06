@@ -1,26 +1,38 @@
-.sdsctag 1.10, "smslib Hello World","smslib Hello World example based on Maxim's tutorial","lajohnston"
+.sdsctag 1.0, "Gems","SMS Remake of the classic game Diamonds","lesharris"
+
+.define mapper.enableCartridgeRam 0
+.define interrupts.handleVBlank 1
+
 .incdir "lib/smslib"
+.include "mapper/waimanu.asm"
 .include "smslib.asm"
 .incdir "."
 
+.include "src/bubble.asm"
+
+.ramsection "bubble" slot mapper.RAM_SLOT
+    bubbleInstance: instanceof Bubble
+.ends
+
+.slot mapper.PAGE_SLOT_A
 .asciitable
   map " " to "~" = 0
 .enda
 
-.incdir "assets"
-.section "assets" free
+.section "assets" superfree
   paletteData:
     palette.rgb 0, 0, 0
     palette.rgb 255, 255, 255
 
   fontData:
-    .incbin "../assets/font.bin" fsize fontDataSize
+    .incbin "assets/font.bin" fsize fontDataSize
 
   message:
     .asc "Hello, world!"
     .db $ff
 .ends
-.incdir "."
+
+.slot mapper.FIXED_SLOT
 
 .section "init" free
 init:
@@ -31,9 +43,45 @@ init:
   patterns.load fontData, fontDataSize
 
   tilemap.setSlot 0, 0
+  mapper.pageBank :message
   tilemap.loadBytesUntil $ff message
 
-  vdp.enableDisplay
+  palette.setSlot palette.SPRITE_PALETTE
+  palette.load bubble.palette, bubble.paletteSize
 
-  -: jr -
+  patterns.setSlot 256
+  patterns.load bubble.patterns, bubble.patternsSize
+
+  ld ix, bubbleInstance
+  bubble.init
+
+  vdp.startBatch
+    vdp.enableDisplay
+    vdp.enableVBlank
+    vdp.hideLeftColumn
+  vdp.endBatch
+
+  interrupts.enable
+
+  jp mainLoop
+.ends
+
+.section "mainLoop" free
+mainLoop:
+  interrupts.waitForVBlank
+
+  ld ix, bubbleInstance
+  call bubble.updateInput
+  call bubble.updateMovement
+
+  sprites.reset
+  call bubble.updateSprite
+
+  jp mainLoop
+.ends
+
+.section "vBlankHandler" free
+  interrupts.onVBlank:
+    sprites.copyToVram
+    interrupts.endVBlank
 .ends
