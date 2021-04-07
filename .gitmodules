@@ -1,3 +1,6 @@
 [submodule "lib/smslib"]
 	path = lib/smslib
 	url = https://github.com/lajohnston/smslib.git
+[submodule "lib/psglib"]
+	path = lib/psglib
+	url = https://github.com/sverx/PSGlib.git

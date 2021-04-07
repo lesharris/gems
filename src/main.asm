@@ -6,6 +6,10 @@
 .incdir "lib/smslib"
 .include "mapper/waimanu.asm"
 .include "smslib.asm"
+
+.incdir "lib/psglib/src"
+.include "PSGlib.inc"
+
 .incdir "."
 
 .include "src/bubble.asm"
@@ -32,10 +36,22 @@
     .db $ff
 .ends
 
+.section "harrier" superfree
+  harrier:
+    .incbin "assets/harrier.psg"
+.ends
+
+.section "bridgezone" superfree
+  bridgezone:
+    .incbin "assets/bridgezone.psg"
+.ends
+
 .slot mapper.FIXED_SLOT
 
 .section "init" free
 init:
+  call PSGInit
+
   palette.setSlot 0
   palette.loadSlice paletteData, 2
 
@@ -63,6 +79,9 @@ init:
 
   interrupts.enable
 
+  ld hl, :bridgezone
+  call PSGPlay
+
   jp mainLoop
 .ends
 
@@ -82,6 +101,7 @@ mainLoop:
 
 .section "vBlankHandler" free
   interrupts.onVBlank:
+    call PSGFrame
     sprites.copyToVram
     interrupts.endVBlank
 .ends
